@@ -14,6 +14,8 @@ public class UserService {
     private UserRepository userRepository;
 
     public User saveUser(User user) {
+        // 역할을 숫자로 설정 (기본값: 0 -> 일반 사용자)
+        user.setRole(user.getRole() == 1 ? 1 : 0);
         return userRepository.save(user);
     }
 

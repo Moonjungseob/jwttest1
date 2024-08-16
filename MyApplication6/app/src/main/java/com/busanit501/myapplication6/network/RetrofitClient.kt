@@ -14,7 +14,7 @@ object RetrofitClient {
             .client(OkHttpClient.Builder().build())
             .addConverterFactory(GsonConverterFactory.create())
             .build()
-    }
+    }4
 
     val apiService: ApiService by lazy {
         retrofit.create(ApiService::class.java)

@@ -7,9 +7,10 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 
 public class UserDetailsImpl implements UserDetails {
-
     private final User user;
 
     public UserDetailsImpl(User user) {
@@ -18,20 +19,25 @@ public class UserDetailsImpl implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        // 권한 설정, 이 예제에서는 단일 역할을 부여합니다.
-        return Collections.singletonList(new SimpleGrantedAuthority("ROLE_USER"));
+        Set<GrantedAuthority> authorities = new HashSet<>();
+
+        // 역할에 따라 권한 추가
+        if (user.getRole() == 1) {
+            authorities.add(new SimpleGrantedAuthority("ROLE_ADMIN"));
+        } else {
+            authorities.add(new SimpleGrantedAuthority("ROLE_USER"));
+        }
+
+        return authorities;
     }
 
     @Override
     public String getPassword() {
-        // User 엔티티에 비밀번호 필드가 있다면 해당 값을 반환합니다.
-        // 현재 엔티티에는 없으므로 null 반환 (추가 필요)
-        return null;
+        return user.getPassword();
     }
 
     @Override
     public String getUsername() {
-        // 인증에 사용할 사용자 이름 반환 (이 경우 이메일을 사용 가능)
         return user.getEmail();
     }
 
@@ -53,9 +59,5 @@ public class UserDetailsImpl implements UserDetails {
     @Override
     public boolean isEnabled() {
         return true;
-    }
-
-    public User getUser() {
-        return user;
     }
 }

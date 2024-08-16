@@ -1,6 +1,7 @@
 package com.busanit501.testdbmaria.controller;
 
 import com.busanit501.testdbmaria.model.AuthenticationRequest;
+import com.busanit501.testdbmaria.model.AuthenticationResponse;
 import com.busanit501.testdbmaria.secureity.JwtTokenUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -27,7 +28,7 @@ public class JwtAuthenticationController {
     private UserDetailsService userDetailsService;
 
     @PostMapping("/authenticate")
-    public String createAuthenticationToken(@RequestBody AuthenticationRequest authenticationRequest) throws Exception {
+    public AuthenticationResponse createAuthenticationToken(@RequestBody AuthenticationRequest authenticationRequest) throws Exception {
         try {
             // 사용자 인증
             authenticationManager.authenticate(
@@ -39,6 +40,9 @@ public class JwtAuthenticationController {
 
         // 인증 성공 시 토큰 생성
         final UserDetails userDetails = userDetailsService.loadUserByUsername(authenticationRequest.getEmail());
-        return jwtTokenUtil.generateToken(userDetails.getUsername());
+        final String jwt = jwtTokenUtil.generateToken(userDetails);
+
+        // JSON 형태로 JWT 반환
+        return new AuthenticationResponse(jwt);
     }
 }

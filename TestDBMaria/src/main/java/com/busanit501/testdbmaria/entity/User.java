@@ -1,10 +1,8 @@
 package com.busanit501.testdbmaria.entity;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
+import jakarta.persistence.*;
 import lombok.*;
-import jakarta.persistence.Id;
+
 
 @Data
 @Entity
@@ -21,11 +19,17 @@ public class User {
     private String email;
     private String password;  // 로그인 시 사용할 비밀번호 필드
 
-    public User(String name, String email, String password) {
+    @Column(nullable = false)
+    private int role; // 역할 (0: 일반 사용자, 1: 관리자)
+
+    public User(String name, String email, String password, int role) {
         this.name = name;
         this.email = email;
         this.password = password;
+        this.role = role;
     }
 
-
+    public String getRoleAsString() {
+        return this.role == 1 ? "ROLE_ADMIN" : "ROLE_USER";
+    }
 }

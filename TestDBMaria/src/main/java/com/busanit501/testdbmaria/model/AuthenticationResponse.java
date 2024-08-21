@@ -1,14 +1,11 @@
 package com.busanit501.testdbmaria.model;
 
+import lombok.AllArgsConstructor;
+import lombok.Data;
+
+@Data
+@AllArgsConstructor
 public class AuthenticationResponse {
-
-    private final String token;
-
-    public AuthenticationResponse(String token) {
-        this.token = token;
-    }
-
-    public String getToken() {
-        return token;
-    }
+    private String jwt;
+    private String refreshToken;
 }

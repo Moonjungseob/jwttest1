@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .container {
+            width: 300px;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        .input-field {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            box-sizing: border-box;
+        }
+        .button {
+            width: 100%;
+            padding: 10px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        .button:hover {
+            background-color: #45a049;
+        }
+        .red-button {
+            background-color: #f44336;
+        }
+        .red-button:hover {
+            background-color: #e53935;
+        }
+        .secondary-button {
+            background-color: #008CBA;
+            margin-top: 10px;
+        }
+        .secondary-button:hover {
+            background-color: #007bb5;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Login</h2>
+    <input id="name" class="input-field" type="text" placeholder="Username" required>
+    <input id="password" class="input-field" type="password" placeholder="Password" required>
+    <button id="loginButton" class="button">Login</button>
+    <button id="logoutButton" class="button red-button" style="margin-top: 10px;">Logout</button>
+    <button id="showAccessTokenButton" class="button secondary-button">Show Access Token</button>
+    <button id="showRefreshTokenButton" class="button secondary-button">Show Refresh Token</button>
+    <p id="message"></p>
+</div>
+
+<script>
+    document.getElementById('loginButton').addEventListener('click', function () {
+        const name = document.getElementById('name').value;
+        const password = document.getElementById('password').value;
+
+        fetch('/api/authenticate', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({name: name, password: password})
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.jwt) {
+                    localStorage.setItem('accessToken', data.jwt);
+                    localStorage.setItem('refreshToken', data.refreshToken);
+                    document.getElementById('message').innerText = 'Login successful!';
+                } else {
+                    document.getElementById('message').innerText = 'Login failed!';
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                document.getElementById('message').innerText = 'An error occurred!';
+            });
+    });
+
+    document.getElementById('logoutButton').addEventListener('click', function () {
+        localStorage.removeItem('accessToken');
+        localStorage.removeItem('refreshToken');
+        document.getElementById('message').innerText = 'Logged out! Refresh token removed.';
+    });
+
+    // Show Access Token
+    document.getElementById('showAccessTokenButton').addEventListener('click', function () {
+        const accessToken = localStorage.getItem('accessToken');
+        if (accessToken) {
+            document.getElementById('message').innerText = 'Access Token: ' + accessToken;
+        } else {
+            document.getElementById('message').innerText = 'No Access Token found.';
+        }
+    });
+
+    // Show Refresh Token
+    document.getElementById('showRefreshTokenButton').addEventListener('click', function () {
+        const refreshToken = localStorage.getItem('refreshToken');
+        if (refreshToken) {
+            document.getElementById('message').innerText = 'Refresh Token: ' + refreshToken;
+        } else {
+            document.getElementById('message').innerText = 'No Refresh Token found.';
+        }
+    });
+
+    // Function to check if refresh token exists
+    function checkRefreshToken() {
+        const refreshToken = localStorage.getItem('refreshToken');
+        if (refreshToken) {
+            document.getElementById('message').innerText = 'Refresh token is present.';
+        } else {
+            document.getElementById('message').innerText = 'No refresh token found.';
+        }
+    }
+
+    // Call checkRefreshToken on page load
+    window.onload = checkRefreshToken;
+</script>
+
+</body>
+</html>

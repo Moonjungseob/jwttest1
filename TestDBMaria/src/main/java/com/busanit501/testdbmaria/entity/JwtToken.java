@@ -6,14 +6,26 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import lombok.Data;
 
-@Data
-@Entity
-public class Role {
+import java.time.LocalDateTime;
 
+
+@Entity
+@Data
+public class JwtToken {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String user;
-    private String admin;// 역할 이름 (예: ROLE_USER, ROLE_ADMIN)
+    private String token;
+
+    private String refreshToken;
+
+    private String name;
+
+
+    private LocalDateTime issuedAt;
+
+    private LocalDateTime expiresAt;
+
+    private LocalDateTime refreshExpiresAt;
 }

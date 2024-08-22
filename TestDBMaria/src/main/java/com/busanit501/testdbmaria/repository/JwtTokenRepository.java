@@ -7,7 +7,6 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 import java.util.Optional;
 
-@Repository
 public interface JwtTokenRepository extends JpaRepository<JwtToken, Long> {
     // AccessToken으로 JwtToken을 조회하는 메서드
     Optional<JwtToken> findByToken(String token);

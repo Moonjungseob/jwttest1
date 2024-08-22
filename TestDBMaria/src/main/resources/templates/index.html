@@ -61,6 +61,8 @@
     <button id="logoutButton" class="button red-button" style="margin-top: 10px;">Logout</button>
     <button id="showAccessTokenButton" class="button secondary-button">Show Access Token</button>
     <button id="showRefreshTokenButton" class="button secondary-button">Show Refresh Token</button>
+    <button id="userRole" class="button">유저 권한 확인</button>
+    <button id="pageButton" class="button">페이지1로 이동</button>
     <p id="message"></p>
 </div>
 
@@ -94,7 +96,6 @@
 
     document.getElementById('logoutButton').addEventListener('click', function () {
         localStorage.removeItem('accessToken');
-        localStorage.removeItem('refreshToken');
         document.getElementById('message').innerText = 'Logged out! Refresh token removed.';
     });
 
@@ -130,6 +131,31 @@
 
     // Call checkRefreshToken on page load
     window.onload = checkRefreshToken;
+    document.getElementById("pageButton").onclick = function() {
+        const accessToken = localStorage.getItem('accessToken');
+
+        if (accessToken) {
+            fetch('/page1', {
+                method: 'GET',
+                headers: {
+                    'Authorization': 'Bearer ' + accessToken
+                }
+            })
+                .then(response => {
+                    if (response.ok) {
+                        window.location.href = "/page1";
+                    } else {
+                        document.getElementById('message').innerText = 'Access denied: insufficient permissions.';
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    document.getElementById('message').innerText = 'An error occurred!';
+                });
+        } else {
+            document.getElementById('message').innerText = 'No access token found. Please login.';
+        }
+    };
 </script>
 
 </body>

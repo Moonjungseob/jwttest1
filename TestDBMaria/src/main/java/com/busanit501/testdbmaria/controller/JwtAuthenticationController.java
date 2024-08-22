@@ -16,6 +16,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -56,19 +57,13 @@ public class JwtAuthenticationController {
         final String jwt = jwtTokenUtil.generateToken(userDetails);
         final String refreshToken = jwtTokenUtil.generateRefreshToken(userDetails.getUsername());
 
-        Optional<JwtToken> existingToken = Optional.ofNullable(jwtTokenService.findByName(userDetails.getUsername()));
-        if (existingToken.isPresent()) {
-            JwtToken jwtToken = existingToken.get();
-            jwtToken.setToken(jwt); // Update access token
-            jwtToken.setRefreshToken(refreshToken); // Update refresh token
-            jwtTokenService.save(jwtToken); // Save updated tokens
-        } else {
-            JwtToken jwtToken = new JwtToken();
-            jwtToken.setToken(jwt);
-            jwtToken.setRefreshToken(refreshToken);
-            jwtToken.setName(userDetails.getUsername());
-            jwtTokenService.save(jwtToken);
-        }
+        // Get current time for issuedAt and calculate expiration times
+        LocalDateTime issuedAt = LocalDateTime.now();
+        LocalDateTime expiresAt = issuedAt.plusSeconds(jwtTokenUtil.JWT_EXPIRATION / 1000); // convert milliseconds to seconds
+        LocalDateTime refreshExpiresAt = issuedAt.plusSeconds(jwtTokenUtil.REFRESH_TOKEN_EXPIRATION_TIME / 1000);
+
+        // Save or update the token using the service's saveToken method
+        jwtTokenService.saveToken(jwt, refreshToken, userDetails.getUsername(), issuedAt, expiresAt, refreshExpiresAt);
 
         Map<String, String> tokens = new HashMap<>();
         tokens.put("accessToken", jwt);
@@ -93,6 +88,12 @@ public class JwtAuthenticationController {
 
             UserDetails userDetails = userDetailsService.loadUserByUsername(username);
             String newAccessToken = jwtTokenUtil.generateToken(userDetails);
+
+            // Update the access token and refresh token expiration times in the database
+            LocalDateTime issuedAt = LocalDateTime.now();
+            LocalDateTime expiresAt = issuedAt.plusSeconds(jwtTokenUtil.JWT_EXPIRATION / 1000);
+
+            jwtTokenService.saveToken(newAccessToken, refreshToken, userDetails.getUsername(), issuedAt, expiresAt, storedToken.get().getRefreshExpiresAt());
 
             Map<String, String> tokens = new HashMap<>();
             tokens.put("accessToken", newAccessToken);

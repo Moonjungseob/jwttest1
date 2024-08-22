@@ -14,6 +14,16 @@ public class LoginController {
     public String login() {
         return "login"; // login.html 템플릿을 반환
     }
+
+    @GetMapping("/page1")
+    public String page1() {
+        return "page1"; // login.html 템플릿을 반환
+    }
+
+    @GetMapping("/page2")
+    public String page2() {
+        return "page2"; // login.html 템플릿을 반환
+    }
     @GetMapping("/index")
     public String index() {
         return "index"; // login.html 템플릿을 반환

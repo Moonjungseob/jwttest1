@@ -31,9 +31,13 @@ public class JwtRequestFilter extends OncePerRequestFilter {
             throws ServletException, IOException {
 
         final String requestURI = request.getRequestURI();
+        final String method = request.getMethod();
+        log.info("Processing request for URI: " + requestURI + " with method: " + method);
+
         // 특정 경로에 대한 필터링 제외 처리
-        if (requestURI.startsWith("/login") || requestURI.startsWith("/api/authenticate") || requestURI.startsWith("/static/")|| requestURI.startsWith("/index") ) {
-            // 로그인 페이지, 인증 API, 정적 리소스는 필터링하지 않음
+        if (requestURI.startsWith("/login") || requestURI.startsWith("/api/authenticate") ||
+                requestURI.startsWith("/static/") || requestURI.startsWith("/index")) {
+            log.info("Skipping JWT filter for URI: " + requestURI);
             chain.doFilter(request, response);
             return;
         }
@@ -41,35 +45,27 @@ public class JwtRequestFilter extends OncePerRequestFilter {
         final String authorizationHeader = request.getHeader("Authorization");
         log.info("Authorization Header: " + authorizationHeader);
 
-        String username = null;
-        String jwt = null;
-
         if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
-            jwt = authorizationHeader.substring(7).trim(); // 공백 제거
-            username = jwtTokenUtil.extractUsername(jwt);
-            log.info("Extracted JWT: " + jwt);
-            log.info("유저네임보기" + username);
+            String jwt = authorizationHeader.substring(7).trim();
+            String username = jwtTokenUtil.extractUsername(jwt);
+            log.info("Extracted JWT: " + jwt + ", Username: " + username);
+
+            if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+                UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+
+                if (jwtTokenUtil.validateToken(jwt, userDetails)) {
+                    UsernamePasswordAuthenticationToken authentication =
+                            new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+                    authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                    SecurityContextHolder.getContext().setAuthentication(authentication);
+                    log.info("User " + username + " is authenticated and added to SecurityContextHolder.");
+                }
+            }
         } else {
             log.warn("Authorization header is missing or does not start with Bearer.");
         }
 
-        if (username != null && jwt != null) {
-            UserDetails userDetails = userDetailsService.loadUserByUsername(username);
-            log.info("유저네임보기2" + userDetails);
-            boolean isTokenValid = jwtTokenUtil.validateToken(jwt, userDetails);
-            log.info("Is Token Valid: " + isTokenValid);
-
-            if (isTokenValid) {
-                UsernamePasswordAuthenticationToken authentication =
-                        new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
-                authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-
-                SecurityContextHolder.getContext().setAuthentication(authentication);
-                log.info("User " + username + " is authenticated and added to SecurityContextHolder.");
-            } else {
-                log.warn("JWT token is not valid.");
-            }
-        }
-        chain.doFilter(request, response);
+        log.info("Continuing filter chain after JWT validation.");
+//        chain.doFilter(request, response);
     }
 }

@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>페이지1</title>
+</head>
+<body>
+<div class="container">
+<button id="page1Button" class="button">화면 2로 이동</button>
+<div id="content"></div> <!-- Protected content will be displayed here -->
+</div>
+<script>
+    document.getElementById("page1Button").onclick = function() {
+        window.location.href = "/page2";
+    };
+
+    document.addEventListener('DOMContentLoaded', function () {
+        const accessToken = localStorage.getItem('accessToken');
+        console.log(accessToken);
+
+        if (accessToken) {
+            // JWT가 있으면 서버로 검증 요청
+            fetch('/api/protected-resource', {
+                method: 'GET',
+                headers: {
+                    'Authorization': 'Bearer ' + accessToken
+                }
+            })
+                .then(response => {
+                    if (response.ok) {
+                        return response.json();
+                    } else {
+                        throw new Error('Unauthorized');
+                    }
+                })
+                .then(data => {
+                    // 보호된 리소스를 성공적으로 가져온 경우
+                    document.getElementById('content').innerText = 'Protected content: ' + JSON.stringify(data);
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    // 인증 실패 시 처리
+                    document.getElementById('content').innerText = 'Failed to fetch protected content. Redirecting to login...';
+                    setTimeout(() => {
+                        window.location.href = "/login"; // 로그인 페이지로 리디렉션
+                    }, 3000); // 3초 후 리디렉션
+                });
+        } else {
+            // JWT가 없으면 로그인 페이지로 리디렉션
+            document.getElementById('content').innerText = 'No access token found. Redirecting to login...';
+            setTimeout(() => {
+                window.location.href = "/login";
+            }, 3000); // 3초 후 리디렉션
+        }
+    });
+</script>
+</body>
+</html>

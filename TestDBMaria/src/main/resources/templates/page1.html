@@ -4,11 +4,45 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>페이지1</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .container {
+            width: 300px;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        .button {
+            width: 100%;
+            padding: 10px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        .button:hover {
+            background-color: #45a049;
+        }
+        .red-button {
+            background-color: #f44336;
+        }
+        .red-button:hover {
+            background-color: #e53935;
+        }
+    </style>
 </head>
 <body>
 <div class="container">
-<button id="page1Button" class="button">화면 2로 이동</button>
-<div id="content"></div> <!-- Protected content will be displayed here -->
+    <button id="page1Button" class="button">화면 2로 이동</button>
+    <div id="content"></div> <!-- Protected content will be displayed here -->
+    <div id="tokenDisplay"></div> <!-- JWT Token display -->
 </div>
 <script>
     document.getElementById("page1Button").onclick = function() {
@@ -17,9 +51,13 @@
 
     document.addEventListener('DOMContentLoaded', function () {
         const accessToken = localStorage.getItem('accessToken');
-        console.log(accessToken);
+        const tokenDisplay = document.getElementById('tokenDisplay');
+        const content = document.getElementById('content');
 
         if (accessToken) {
+            // Display the JWT token
+            tokenDisplay.innerText = 'Access Token: ' + accessToken;
+
             // JWT가 있으면 서버로 검증 요청
             fetch('/api/protected-resource', {
                 method: 'GET',
@@ -36,22 +74,22 @@
                 })
                 .then(data => {
                     // 보호된 리소스를 성공적으로 가져온 경우
-                    document.getElementById('content').innerText = 'Protected content: ' + JSON.stringify(data);
+                    content.innerText = 'Protected content: ' + JSON.stringify(data);
                 })
                 .catch(error => {
                     console.error('Error:', error);
                     // 인증 실패 시 처리
-                    document.getElementById('content').innerText = 'Failed to fetch protected content. Redirecting to login...';
+                    content.innerText = 'Failed to fetch protected content. Redirecting to login...';
                     setTimeout(() => {
                         window.location.href = "/login"; // 로그인 페이지로 리디렉션
-                    }, 3000); // 3초 후 리디렉션
+                    }, 30000); // 3초 후 리디렉션
                 });
         } else {
             // JWT가 없으면 로그인 페이지로 리디렉션
-            document.getElementById('content').innerText = 'No access token found. Redirecting to login...';
+            content.innerText = 'No access token found. Redirecting to login...';
             setTimeout(() => {
                 window.location.href = "/login";
-            }, 3000); // 3초 후 리디렉션
+            }, 30000); // 3초 후 리디렉션
         }
     });
 </script>

@@ -34,10 +34,14 @@ public class JwtRequestFilter extends OncePerRequestFilter {
         final String method = request.getMethod();
         log.info("Processing request for URI: " + requestURI + " with method: " + method);
 
-        // 특정 경로에 대한 필터링 제외 처리
-        if (requestURI.startsWith("/login") || requestURI.startsWith("/api/authenticate") ||
-                requestURI.startsWith("/static/") || requestURI.startsWith("/index")) {
-            log.info("Skipping JWT filter for URI: " + requestURI);
+        // 특정 경로에 대한 필터링 제외 처리 및 모든 GET 요청 제외
+        if (method.equalsIgnoreCase("GET") ||
+                requestURI.startsWith("/login") ||
+                requestURI.startsWith("/api/authenticate") ||
+                requestURI.startsWith("/static/") ||
+                requestURI.startsWith("/index") ||
+                requestURI.startsWith("/api/users")) {
+            log.info("Skipping JWT filter for URI: " + requestURI + " with method: " + method);
             chain.doFilter(request, response);
             return;
         }

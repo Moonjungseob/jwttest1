@@ -60,8 +60,8 @@ public class SecurityConfig  {
                 .csrf(csrf -> csrf.disable())  // CSRF 보호 비활성화
                 .cors(withDefaults())  // CORS 설정 추가
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(HttpMethod.POST, "/api/users").permitAll()  // 회원가입은 인증 없이 허용
-                        .requestMatchers("/api/authenticate", "/login", "/index").permitAll()  // 로그인은 인증 없이 허용
+                        .requestMatchers(HttpMethod.GET ).permitAll()  // 회원가입은 인증 없이 허용
+                        .requestMatchers("/api/authenticate", "/api/users","/login", "/index").permitAll()  // 로그인은 인증 없이 허용
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")  // 관리자 권한 필요
                         .anyRequest().authenticated()  // 그 외 모든 요청은 인증 필요
                 )

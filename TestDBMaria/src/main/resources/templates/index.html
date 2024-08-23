@@ -96,10 +96,10 @@
 
     document.getElementById('logoutButton').addEventListener('click', function () {
         localStorage.removeItem('accessToken');
-        document.getElementById('message').innerText = 'Logged out! Refresh token removed.';
+        localStorage.removeItem('refreshToken');
+        document.getElementById('message').innerText = 'Logged out! Tokens removed.';
     });
 
-    // Show Access Token
     document.getElementById('showAccessTokenButton').addEventListener('click', function () {
         const accessToken = localStorage.getItem('accessToken');
         if (accessToken) {
@@ -109,7 +109,6 @@
         }
     });
 
-    // Show Refresh Token
     document.getElementById('showRefreshTokenButton').addEventListener('click', function () {
         const refreshToken = localStorage.getItem('refreshToken');
         if (refreshToken) {
@@ -119,7 +118,6 @@
         }
     });
 
-    // Function to check if refresh token exists
     function checkRefreshToken() {
         const refreshToken = localStorage.getItem('refreshToken');
         if (refreshToken) {
@@ -129,24 +127,31 @@
         }
     }
 
-    // Call checkRefreshToken on page load
     window.onload = checkRefreshToken;
+
     document.getElementById("pageButton").onclick = function() {
         const accessToken = localStorage.getItem('accessToken');
 
         if (accessToken) {
             fetch('/page1', {
-                method: 'GET',
+                method: 'POST',
                 headers: {
-                    'Authorization': 'Bearer ' + accessToken
-                }
+                    'Authorization': 'Bearer ' + accessToken,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({name: 'admin'}) // Sending the payload as expected by the server
             })
                 .then(response => {
                     if (response.ok) {
-                        window.location.href = "/page1";
+                        return response.text(); // Get the response text
                     } else {
-                        document.getElementById('message').innerText = 'Access denied: insufficient permissions.';
+                        throw new Error('Access denied or error occurred.');
                     }
+                })
+                .then(message => {
+                    document.getElementById('message').innerText = message;
+                    // Redirect to /page1 after displaying the message
+                    window.location.href = '/page1';
                 })
                 .catch(error => {
                     console.error('Error:', error);

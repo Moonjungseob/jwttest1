@@ -2,12 +2,19 @@ package com.busanit501.testdbmaria.controller;
 
 import com.busanit501.testdbmaria.service.JwtTokenService;
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.ResponseBody;
 
+import java.util.Map;
+
+@Log4j2
 @Controller
 public class LoginController {
     @GetMapping("/login")
@@ -49,5 +56,16 @@ public class LoginController {
 
         // 로그아웃 후 로그인 페이지로 리디렉션
         return "redirect:/login?logout";
+    }
+    @PostMapping("/page1")
+    @ResponseBody
+    public ResponseEntity<String> postToPage1(@RequestBody Map<String, String> requestBody) {
+        // Check if the "name" key exists and equals "admin"
+        if ("John".equals(requestBody.get("name"))) {
+            log.info("success");
+            return ResponseEntity.ok("success");
+        } else {
+            return ResponseEntity.status(400).body("failure");
+        }
     }
 }

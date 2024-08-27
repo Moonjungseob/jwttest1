@@ -16,6 +16,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.client.RestTemplate;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -46,6 +47,11 @@ public class SecurityConfig  {
     private UserDetailsService userDetailsService;
 
     @Bean
+    public RestTemplate restTemplate() {
+        return new RestTemplate();
+    }
+
+    @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.setAllowedOrigins(Arrays.asList("*"));  // 허용할 도메인
@@ -61,7 +67,7 @@ public class SecurityConfig  {
                 .cors(withDefaults())  // CORS 설정 추가
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.GET ).permitAll()  // 회원가입은 인증 없이 허용
-                        .requestMatchers("/api/authenticate", "/api/users","/login", "/index").permitAll()  // 로그인은 인증 없이 허용
+                        .requestMatchers("/api/authenticate", "/api/users","/api/mongoUsers","/login","/classify", "/index").permitAll()  // 로그인은 인증 없이 허용
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")  // 관리자 권한 필요
                         .anyRequest().authenticated()  // 그 외 모든 요청은 인증 필요
                 )

@@ -38,8 +38,10 @@ public class JwtRequestFilter extends OncePerRequestFilter {
         if (method.equalsIgnoreCase("GET") ||
                 requestURI.startsWith("/login") ||
                 requestURI.startsWith("/api/authenticate") ||
+                requestURI.startsWith("/api/mongoUsers") ||
                 requestURI.startsWith("/static/") ||
                 requestURI.startsWith("/index") ||
+                requestURI.startsWith("/classify") ||
                 requestURI.startsWith("/api/users")) {
             log.info("Skipping JWT filter for URI: " + requestURI + " with method: " + method);
             chain.doFilter(request, response);
